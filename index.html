@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Four Pots Time Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+/* Layout: a working desk. Steps 1 and 2 pair inputs with one live donut. Step 3 gives the stage to three equal, large donuts, with compact input rows underneath. */
+:root{
+  --bg:#EBEFEC; --surface:#F7F9F7; --field:#FFFFFF; --ink:#14282B; --muted:#52666A; --line:#CFD8D3;
+  --accent:#0B6E6E; --accent-ink:#FFFFFF; --warn:#B4441A;
+  --a1:#3F6FD1; --a2:#3A9D5D; --a3:#CF4F86; --a4:#D9A21B; --a5:#8A83C7; --a6:#E36A2E; --a7:#0E9AA7; --a8:#8F6B4A; --a9:#667A82; --a10:#A4B83A;
+  --p-vitality:var(--a2); --p-productivity:var(--a1); --p-relationships:var(--a3); --p-transformation:var(--a4);
+  --p-others:#A3B0AC; --unlogged:#DCE3DE;
+  --display:'Bricolage Grotesque','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --body:'Figtree','Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1819; --surface:#152325; --field:#0E1819; --ink:#E6EFEC; --muted:#9DB0AC; --line:#2B3C3E;
+    --accent:#3FC1BA; --accent-ink:#062124; --warn:#FF9568;
+    --a1:#7B9DF0; --a2:#5BC07F; --a3:#EE79A8; --a4:#F0BE45; --a5:#A9A3E2; --a6:#FF8F57; --a7:#38C2CE; --a8:#BE9674; --a9:#8AA0A8; --a10:#C6D863;
+    --p-others:#586764; --unlogged:#26373A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1819; --surface:#152325; --field:#0E1819; --ink:#E6EFEC; --muted:#9DB0AC; --line:#2B3C3E;
+  --accent:#3FC1BA; --accent-ink:#062124; --warn:#FF9568;
+  --a1:#7B9DF0; --a2:#5BC07F; --a3:#EE79A8; --a4:#F0BE45; --a5:#A9A3E2; --a6:#FF8F57; --a7:#38C2CE; --a8:#BE9674; --a9:#8AA0A8; --a10:#C6D863;
+  --p-others:#586764; --unlogged:#26373A;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:28px 40px}
+*{box-sizing:border-box}
+.wrap{max-width:1240px;margin-inline:auto;display:flex;flex-direction:column;gap:20px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.hero{display:flex;flex-direction:column;gap:10px;max-width:46rem}
+.eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(2.1rem,6.4vw,3.5rem);line-height:1.02;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.intro{margin:0;color:var(--muted);max-width:40rem}
+
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.steps button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;min-width:0}
+.steps .n{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.steps .l{font-weight:600;font-size:.95rem;overflow-wrap:anywhere}
+.steps button[aria-current="step"]{border-color:var(--accent);box-shadow:inset 0 -3px 0 var(--accent)}
+.steps button[aria-current="step"] .n{color:var(--accent)}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.chart-card{order:-1}
+@media (min-width:900px){
+  .layout{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:start}
+  .chart-card{order:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+}
+.layout.solo{grid-template-columns:minmax(0,1fr)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.panel{display:flex;flex-direction:column;gap:14px}
+h2{font-family:var(--display);font-weight:700;font-size:1.45rem;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h3{font-family:var(--display);font-weight:500;font-size:1.05rem;margin:0}
+.lede{margin:0;color:var(--muted);max-width:44rem}
+.banner{margin:0;padding:8px 12px;border-radius:8px;border:1px dashed var(--accent);font-size:.9rem;color:var(--ink)}
+
+.ledger{display:flex;flex-direction:column;gap:6px}
+.ledger-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-size:.92rem}
+.meter{height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.meter>div{height:100%;background:var(--accent);width:0}
+.meter.over>div{background:var(--warn)}
+.over-msg{color:var(--warn)}
+
+.rows{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row.edit{grid-template-columns:minmax(0,1fr) auto auto}
+.row .ctl{grid-column:1/-1}
+.field{border:1px solid var(--line);background:var(--field);border-radius:8px;padding:.5rem .6rem;min-width:0;width:100%}
+.hrs{display:flex;align-items:center;gap:6px}
+.hrs .hours{width:5.2rem;text-align:right;font-family:var(--mono)}
+.static-name{font-weight:500;overflow-wrap:anywhere}
+.static-h{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.icon-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:transparent;cursor:pointer;color:var(--muted);font-size:1.2rem;line-height:1}
+.icon-btn:hover{color:var(--warn);border-color:var(--warn)}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:.35rem .7rem;border-radius:99px;border:1px solid var(--line);background:transparent;cursor:pointer;font-size:.88rem;text-align:left}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.tools{display:flex;flex-wrap:wrap;gap:8px}
+
+.btn{font-weight:600;padding:.62rem 1.05rem;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding-top:6px}
+
+.potgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}
+.pot{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--field);min-width:0}
+.pot .head{display:flex;align-items:center;gap:8px;font-weight:600}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.pot .hh{font-family:var(--mono);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.pill{align-self:flex-start;font-size:.8rem;font-weight:600;padding:.15rem .6rem;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.pill.empty{border-color:var(--warn);color:var(--warn)}
+.pot p{margin:0;font-size:.88rem;color:var(--muted)}
+
+/* Step 3: three equal pies, then compact inputs. Mobile order is pie a, pie b, inputs, pie c. Desktop is three pies in a row, inputs below. */
+.s3grid{display:grid;gap:22px 28px;grid-template-columns:minmax(0,1fr);grid-template-areas:"a" "b" "in" "c"}
+@media (min-width:820px){
+  .s3grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:"a b c" "in in in";align-items:start}
+}
+.pie{margin:0;min-width:0;display:flex;flex-direction:column;gap:4px}
+.pie.a{grid-area:a}
+.pie.b{grid-area:b}
+.pie.c{grid-area:c}
+.pie h3{font-size:1.1rem}
+.pie .cap{margin:0;font-size:.85rem;color:var(--muted)}
+.pie .donut{width:100%;max-width:380px;margin:8px auto}
+.pie .legend{width:100%;max-width:380px;margin-inline:auto}
+.inputs{grid-area:in;display:flex;flex-direction:column;gap:8px;min-width:0;border-top:1px solid var(--line);padding-top:16px}
+.strip{display:flex;flex-wrap:wrap;gap:2px 20px;font-size:.9rem;color:var(--muted)}
+.strip b{font-family:var(--mono);font-weight:500;color:var(--ink)}
+.clist{display:flex;flex-direction:column}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:6px 0}
+.crow+.crow{border-top:1px solid var(--line)}
+.cname{display:grid;grid-template-columns:12px minmax(0,1fr);align-items:baseline;gap:0 8px;min-width:0}
+.cname .dot{align-self:center}
+.cname .ya{grid-column:2;font-size:.85rem;color:var(--muted)}
+.weekly{grid-column:1/-1;font-size:.82rem;color:var(--muted)}
+@media (min-width:820px){
+  .crow{grid-template-columns:minmax(0,1.5fr) auto minmax(0,1.2fr)}
+  .weekly{grid-column:auto}
+  .cname{display:flex;flex-wrap:nowrap;gap:0 8px}
+  .cname .ya{grid-column:auto}
+}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper .dval{width:5rem;padding:.3rem .45rem;text-align:right;font-family:var(--mono)}
+.sbtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-size:1.05rem;line-height:1}
+.sbtn[disabled]{opacity:.35;cursor:not-allowed}
+.oval{min-width:8.4rem;text-align:center;font-family:var(--mono);font-size:1.05rem;font-variant-numeric:tabular-nums}
+#sumText{width:100%;min-height:9rem;resize:vertical;font-family:var(--mono);font-size:.85rem}
+.signoff{margin:0;font-family:var(--display);font-size:1.05rem}
+
+.chart-card h2{font-size:1.2rem}
+.donut{display:block;width:100%;max-width:280px;margin:12px auto}
+.donut .c-big{font-family:var(--mono);font-size:30px;fill:var(--ink);text-anchor:middle}
+.donut .c-sub{font-family:var(--body);font-size:11px;fill:var(--muted);text-anchor:middle}
+.legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.legend li{display:grid;grid-template-columns:14px minmax(0,1fr) auto auto;gap:8px;align-items:center;font-size:.9rem}
+.legend .sw{width:12px;height:12px;border-radius:3px}
+.legend .lbl{overflow-wrap:anywhere}
+.legend .hv{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.legend .pc{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);min-width:3ch;text-align:right}
+.privacy{font-size:.82rem;color:var(--muted);margin:12px 0 0}
+.site-foot{padding-top:4px;font-size:.88rem;color:var(--muted)}
+.site-foot a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+@media (prefers-reduced-motion:no-preference){
+  .meter>div{transition:width .25s ease}
+}
+@media (max-width:520px){
+  .steps .l{font-size:.85rem}
+  .steps button{padding:8px 8px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">The Uncommon Chapter · Companion tool</div>
+    <h1>Where did yesterday go?</h1>
+    <p class="intro">Draw the pie chart of yesterday, give your time four pots to live in, then set the day you want. It takes about a minute. Nothing leaves your browser.</p>
+  </header>
+
+  <nav class="steps" id="steps" aria-label="Steps"></nav>
+
+  <div class="layout" id="layout">
+    <section class="card panel" id="panelCard" aria-live="polite">
+      <p class="banner" id="exBanner">Example day loaded. Replace it with yours in step 1.</p>
+      <div id="panel" class="panel"></div>
+    </section>
+    <aside class="card chart-card" id="chartCard" aria-label="Live chart">
+      <h2 id="chartTitle"></h2>
+      <svg class="donut" id="donut" viewBox="0 0 200 200" role="img" aria-label="Donut chart of yesterday"></svg>
+      <ul class="legend" id="legend"></ul>
+      <p class="privacy">Everything stays on this page. Nothing is saved or sent anywhere.</p>
+    </aside>
+  </div>
+  <footer class="site-foot">&copy; Brinny, <a href="https://theuncommonchapter.substack.com" target="_blank" rel="noopener">The Uncommon Chapter</a></footer>
+</div>
+
+<script>
+(function(){
+  var POTS=[
+    {id:'vitality',name:'Vitality',tip:'Try exercise snacking: 20 to 60 seconds of vigorous movement, like taking the stairs.'},
+    {id:'productivity',name:'Productivity',tip:'Learn something for its own sake. Read a chapter, or get better at a skill you only do casually.'},
+    {id:'relationships',name:'Relationships and Purpose',tip:'Reach out to someone new, or do one thing that matters to someone beyond yourself.'},
+    {id:'transformation',name:'Transformational Capacity',tip:'Run a small experiment: spend a week acting like a beginner in a field you admire.'}
+  ];
+  var OTHERS={id:'others',name:'Others',tip:'Work, sleep, chores, admin drift, screens and anything that does not fit the four pots.'};
+  var ALL=POTS.concat([OTHERS]);
+  var OTHER_HUES=['--a5','--a6','--a7','--a8','--a9','--a10'];
+  var STEPNAMES=['Yesterday','Pots','Future'];
+  var TITLES=['Yesterday by activity','Yesterday by category'];
+  var ADMIN='Admin drift (tiny scattered activities)';
+  var MEALS='Meals with family and/or friends';
+  var CHIPS=[
+    ['Sleep',7,'others'],['Work',8,'others'],['Commute',1,'others'],['Chores',1.5,'others'],
+    [ADMIN,1,'others'],['Social media',1,'others'],['Streaming',1.5,'others'],
+    [MEALS,1,'relationships'],['Family time',1,'relationships'],['Friends',1,'relationships'],
+    ['Exercise',0.5,'vitality'],['Reading',0.5,'productivity'],['Hobby practice',0.5,'productivity']
+  ];
+  var uid=1;
+  function mk(name,h,pot){return {id:uid++,name:name,h:h,pot:pot||'others'};}
+  function exampleRows(){
+    return [
+      mk('Sleep',7,'others'), mk('Work',8,'others'), mk('Commute',1.5,'others'), mk('Chores',2,'others'),
+      mk(ADMIN,1,'others'), mk('Scrolling social media',1,'others'), mk('Streaming drama',1.5,'others'),
+      mk(MEALS,1,'relationships'), mk('Evening walk',0.5,'vitality'), mk('Guitar practice',0.5,'productivity')
+    ];
+  }
+  var state={step:1,example:true,desiredTouched:false,desired:{vitality:0,productivity:0,relationships:0,transformation:0},rows:exampleRows()};
+
+  function $(s){return document.querySelector(s);}
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function fmt(n){var r=Math.round(n*100)/100;var t=r*10;return Math.abs(t-Math.round(t))<1e-9?r.toFixed(1):r.toFixed(2);}
+  function signed(n){var r=Math.round(n*100)/100;return (r>0?'+':(r<0?'−':''))+fmt(Math.abs(r));}
+  function sum(fn){return state.rows.reduce(function(a,r){return fn(r)?a+(r.h||0):a;},0);}
+  function total(){return sum(function(){return true;});}
+  function potH(id){return sum(function(r){return r.pot===id;});}
+  function dsum(){return POTS.reduce(function(a,p){return a+(state.desired[p.id]||0);},0);}
+  function roundQ(x){return Math.round(x*4)/4;}
+  function deltaText(x){
+    if(Math.abs(x)<0.001)return 'No change from yesterday';
+    return signed(x)+' h a day, '+signed(x*7)+' h a week';
+  }
+
+  /* Start the desired day from yesterday, with at least half an hour in each pot. */
+  function prefill(){
+    if(state.desiredTouched)return;
+    var d={},s=0,guard=400;
+    POTS.forEach(function(p){d[p.id]=Math.max(roundQ(potH(p.id)),0.5);s+=d[p.id];});
+    while(s>24+1e-9&&guard-->0){
+      var big=POTS.reduce(function(m,p){return d[p.id]>d[m.id]?p:m;},POTS[0]);
+      d[big.id]=Math.max(0,d[big.id]-0.25);
+      s=POTS.reduce(function(a,p){return a+d[p.id];},0);
+    }
+    state.desired=d;
+  }
+
+  /* ---------- slices and colours ---------- */
+  /* Line items take shades of their pot's colour. Others items take their own hues, so no item looks like a pot it does not belong to. */
+  function itemColors(){
+    var map={},groups={};
+    state.rows.forEach(function(r){if(r.h>0){(groups[r.pot]=groups[r.pot]||[]).push(r);}});
+    Object.keys(groups).forEach(function(pid){
+      var g=groups[pid],n=g.length;
+      g.forEach(function(r,k){
+        if(pid==='others'){
+          var hue=OTHER_HUES[k%OTHER_HUES.length],round=Math.floor(k/OTHER_HUES.length);
+          map[r.id]=round===0?'var('+hue+')':'color-mix(in srgb,var('+hue+') '+(100-round*30)+'%,var(--surface))';
+        }else{
+          var pct=n===1?100:Math.round(100-k*(45/(n-1)));
+          map[r.id]=pct>=100?'var(--p-'+pid+')':'color-mix(in srgb,var(--p-'+pid+') '+pct+'%,var(--surface))';
+        }
+      });
+    });
+    return map;
+  }
+  function itemSlices(grouped){
+    var cm=itemColors(),rows=state.rows.filter(function(r){return r.h>0;});
+    if(grouped){
+      var order=[];
+      ALL.forEach(function(p){rows.forEach(function(r){if(r.pot===p.id)order.push(r);});});
+      rows=order;
+    }
+    return rows.map(function(r){return {label:(r.name||'').trim()||'Untitled',h:r.h,color:cm[r.id]};});
+  }
+  function potSlices(){
+    var out=[];
+    ALL.forEach(function(p){var h=potH(p.id);if(h>0)out.push({label:p.name,h:h,color:'var(--p-'+p.id+')'});});
+    return out;
+  }
+  function withUnlogged(sl){
+    var logged=sl.reduce(function(a,x){return a+x.h;},0);
+    if(logged<24-0.001)sl=sl.concat([{label:'Not yet logged',h:24-logged,color:'var(--unlogged)'}]);
+    return {list:sl,logged:logged};
+  }
+
+  /* ---------- charts ---------- */
+  function donut(svg,sl,big,sub){
+    var tot=sl.reduce(function(a,x){return a+x.h;},0),denom=Math.max(24,tot);
+    var r=78,C=2*Math.PI*r,cum=0,gap=sl.length>1?1.2:0;
+    var s='<circle cx="100" cy="100" r="'+r+'" fill="none" stroke="var(--line)" stroke-width="26"/>';
+    sl.forEach(function(x){
+      var len=x.h/denom*C,d=Math.max(len-gap,0.01);
+      s+='<circle cx="100" cy="100" r="'+r+'" fill="none" stroke="'+x.color+'" stroke-width="26" stroke-dasharray="'+d.toFixed(3)+' '+(C-d).toFixed(3)+'" stroke-dashoffset="'+(-cum).toFixed(3)+'" transform="rotate(-90 100 100)"><title>'+esc(x.label)+': '+fmt(x.h)+' h</title></circle>';
+      cum+=len;
+    });
+    s+='<text class="c-big" x="100" y="102">'+big+'</text><text class="c-sub" x="100" y="120">'+sub+'</text>';
+    svg.innerHTML=s;
+  }
+  function pie(svgSel,legSel,list,big,sub){
+    donut($(svgSel),list,big,sub);
+    var denom=Math.max(24,list.reduce(function(a,x){return a+x.h;},0));
+    $(legSel).innerHTML=list.map(function(x){
+      return '<li><span class="sw" style="background:'+x.color+'"></span><span class="lbl">'+esc(x.label)+'</span><span class="hv">'+fmt(x.h)+' h</span><span class="pc">'+Math.round(x.h/denom*100)+'%</span></li>';
+    }).join('');
+  }
+  function drawChart(){
+    $('#chartTitle').textContent=TITLES[state.step-1];
+    var res=state.step===1?withUnlogged(itemSlices(false)):withUnlogged(potSlices());
+    pie('#donut','#legend',res.list,fmt(res.logged),'of 24 h logged');
+  }
+
+  /* ---------- panels ---------- */
+  function hoursField(r){return '<div class="hrs"><input class="field hours" type="number" inputmode="decimal" step="0.25" min="0" max="24" value="'+(r.h||'')+'" aria-label="Hours for '+esc(r.name)+'"><span class="muted">h</span></div>';}
+  function foot(nextLabel){
+    return '<div class="foot">'+(state.step>1?'<button class="btn ghost" data-act="back">Back</button>':'<span></span>')+'<button class="btn" data-act="next">'+nextLabel+'</button></div>';
+  }
+
+  function panel1(){
+    var rows=state.rows.map(function(r){
+      return '<div class="row edit" data-id="'+r.id+'"><input class="field name" type="text" maxlength="60" value="'+esc(r.name)+'" aria-label="Activity name">'+hoursField(r)+'<button class="icon-btn" data-act="remove" aria-label="Remove '+esc(r.name)+'">×</button></div>';
+    }).join('');
+    var chips=CHIPS.map(function(c,i){return '<button class="chip" data-act="chip" data-i="'+i+'">+ '+esc(c[0])+'</button>';}).join('');
+    return '<h2>Yesterday, hour by hour</h2>'+
+      '<p class="lede">List what you did and roughly how long it took. Quarter hours are fine. Aim for 24.</p>'+
+      '<div class="ledger"><div class="ledger-top"><strong class="mono" id="ledTxt"></strong><span id="ledMsg"></span></div><div class="meter" id="meter"><div id="meterFill"></div></div></div>'+
+      '<div class="rows" id="rows">'+(rows||'<p class="muted">Nothing here yet. Add an activity below.</p>')+'</div>'+
+      '<div class="chips" aria-label="Quick add">'+chips+'</div>'+
+      '<div class="tools"><button class="btn ghost" data-act="addblank">Add your own</button><button class="btn ghost" data-act="clear">Clear all</button><button class="btn ghost" data-act="example">Load example day</button></div>'+
+      foot('Next: sort into pots');
+  }
+  function panel2(){
+    var rows=state.rows.filter(function(r){return r.h>0;}).map(function(r){
+      var opts=ALL.map(function(p){return '<option value="'+p.id+'"'+(r.pot===p.id?' selected':'')+'>'+esc(p.name)+'</option>';}).join('');
+      return '<div class="row" data-id="'+r.id+'"><span class="static-name">'+esc(r.name||'Untitled')+'</span><span class="static-h">'+fmt(r.h)+' h</span><select class="ctl field potsel" aria-label="Category for '+esc(r.name)+'">'+opts+'</select></div>';
+    }).join('');
+    var cards=ALL.map(function(p){
+      return '<div class="pot"><div class="head"><span class="dot" style="background:var(--p-'+p.id+')"></span>'+esc(p.name)+'</div><div class="hh" id="pc-'+p.id+'"></div><span class="pill" id="pp-'+p.id+'"></span><p>'+esc(p.tip)+'</p></div>';
+    }).join('');
+    return '<h2>Give each hour a pot</h2>'+
+      '<p class="lede">Vitality is health and energy. Productivity is skills and knowledge. Relationships and Purpose is the people around you and why you do what you do. Transformational Capacity is your ability to reinvent yourself. Everything else goes in Others.</p>'+
+      '<div class="rows">'+(rows||'<p class="muted">Log some activities in step 1 first.</p>')+'</div>'+
+      '<h3>Pot check</h3><div class="potgrid">'+cards+'</div>'+
+      foot('Next: your better day');
+  }
+  function pieHTML(k,title,cap,svgId,legId,aria){
+    return '<section class="pie '+k+'"><h3>'+title+'</h3><p class="cap">'+cap+'</p><svg class="donut" id="'+svgId+'" viewBox="0 0 200 200" role="img" aria-label="'+aria+'"></svg><ul class="legend" id="'+legId+'"></ul></section>';
+  }
+  function panel3(){
+    var rows=POTS.map(function(p){
+      return '<div class="crow"><div class="cname"><span class="dot" style="background:var(--p-'+p.id+')"></span><strong>'+esc(p.name)+'</strong><span class="ya mono" id="ya-'+p.id+'"></span></div>'+
+        '<div class="stepper"><button class="sbtn" data-act="ddec" data-t="'+p.id+'" aria-label="Less time for '+esc(p.name)+'">−</button>'+
+        '<input class="field dval" type="number" inputmode="decimal" step="0.25" min="0" max="24" id="dv-'+p.id+'" data-t="'+p.id+'" aria-label="Desired hours a day for '+esc(p.name)+'">'+
+        '<button class="sbtn" data-act="dinc" data-t="'+p.id+'" aria-label="More time for '+esc(p.name)+'">+</button></div>'+
+        '<div class="weekly" id="aw-'+p.id+'"></div></div>';
+    }).join('');
+    var others='<div class="crow"><div class="cname"><span class="dot" style="background:var(--p-others)"></span><strong>Others, the rest</strong><span class="ya mono" id="ya-others"></span></div>'+
+      '<output class="oval" id="ov-others"></output><div class="weekly" id="aw-others"></div></div>';
+    return '<h2>What would a better day look like?</h2>'+
+      '<p class="lede">Compare yesterday with the day you want. Set your desired hours for each pot at the bottom. Others takes the rest.</p>'+
+      '<div class="s3grid">'+
+        pieHTML('a','Yesterday, 5 categories','Hours by pot','donutA','legA','Donut chart of yesterday by five categories')+
+        pieHTML('b','Yesterday, every line item','Each activity you logged','donutB','legB','Donut chart of yesterday by line item')+
+        '<div class="inputs"><h3>Set the day you want</h3>'+
+          '<p class="banner" id="seedNote">Each pot starts at yesterday’s level, with at least half an hour. Change anything.</p>'+
+          '<p class="banner" id="sumHint" hidden></p>'+
+          '<div class="strip"><span>Four pots <b id="pTot"></b></span><span>Others <b id="oTot"></b></span><span>Pot time vs yesterday <b id="wTot"></b> a week</span></div>'+
+          '<div class="clist">'+rows+others+'</div></div>'+
+        pieHTML('c','Desired future','The day you set below','donutC','legC','Donut chart of your desired day')+
+      '</div>'+
+      '<div id="copyOut" hidden><textarea class="field" id="sumText" readonly aria-label="Summary text"></textarea></div>'+
+      '<p class="signoff">Come back tomorrow and draw another pie. Much love, Brinny</p>'+
+      '<div class="foot"><button class="btn ghost" data-act="back">Back</button><span class="muted" id="copyMsg" role="status"></span><button class="btn" data-act="copy">Copy my summary</button></div>';
+  }
+
+  /* ---------- live updates ---------- */
+  function upd1(){
+    var t=total();
+    $('#ledTxt').textContent=fmt(t)+' of 24 h';
+    var m=$('#ledMsg'),meter=$('#meter');
+    meter.classList.toggle('over',t>24+1e-9);
+    $('#meterFill').style.width=Math.min(t/24,1)*100+'%';
+    if(t>24+1e-9){m.textContent='Over by '+fmt(t-24)+' h. Trim something.';m.className='over-msg';}
+    else if(t>=24-1e-9){m.textContent='Every hour is accounted for.';m.className='muted';}
+    else{m.textContent=fmt(24-t)+' h still to place';m.className='muted';}
+  }
+  function upd2(){
+    var t=Math.max(total(),24);
+    ALL.forEach(function(p){
+      var h=potH(p.id);
+      $('#pc-'+p.id).textContent=fmt(h)+' h';
+      var pill=$('#pp-'+p.id);
+      if(h<=0&&p.id!=='others'){pill.textContent='No time yesterday';pill.className='pill empty';}
+      else{pill.textContent=Math.round(h/t*100)+'% of your day';pill.className='pill';}
+    });
+  }
+  function upd3(){
+    var ds=dsum(),oth=Math.max(24-ds,0),t=total();
+    var ap=POTS.reduce(function(a,p){return a+potH(p.id);},0);
+    var hint=$('#sumHint');
+    hint.hidden=Math.abs(t-24)<0.001;
+    hint.textContent='Yesterday adds up to '+fmt(t)+' h, not 24. The comparison uses what you logged.';
+    $('#seedNote').hidden=state.desiredTouched;
+    POTS.forEach(function(p){
+      var a=potH(p.id),d=state.desired[p.id]||0;
+      $('#ya-'+p.id).textContent='yesterday '+fmt(a)+' h';
+      var inp=$('#dv-'+p.id);
+      if(document.activeElement!==inp)inp.value=fmt(d);
+      $('#aw-'+p.id).textContent=deltaText(d-a);
+      document.querySelector('[data-act="ddec"][data-t="'+p.id+'"]').disabled=d<=0;
+      document.querySelector('[data-act="dinc"][data-t="'+p.id+'"]').disabled=ds+0.25>24+1e-9;
+    });
+    var ao=potH('others');
+    $('#ya-others').textContent='yesterday '+fmt(ao)+' h';
+    $('#ov-others').textContent=fmt(oth)+' h';
+    $('#aw-others').textContent=deltaText(oth-ao);
+    $('#pTot').textContent=fmt(ds)+' h';
+    $('#oTot').textContent=fmt(oth)+' h';
+    $('#wTot').textContent=signed((ds-ap)*7)+' h';
+    var A=withUnlogged(potSlices()),B=withUnlogged(itemSlices(true));
+    pie('#donutA','#legA',A.list,fmt(A.logged),'of 24 h logged');
+    pie('#donutB','#legB',B.list,fmt(B.logged),'of 24 h logged');
+    var sl=[];
+    ALL.forEach(function(p){var h=p.id==='others'?oth:(state.desired[p.id]||0);if(h>0)sl.push({label:p.name,h:h,color:'var(--p-'+p.id+')'});});
+    pie('#donutC','#legC',sl,'24','h in the day');
+  }
+  function updateDerived(){
+    $('#exBanner').hidden=!state.example;
+    if(state.step<3)drawChart();
+    if(state.step===1)upd1();
+    else if(state.step===2)upd2();
+    else upd3();
+  }
+  function renderNav(){
+    $('#steps').innerHTML=STEPNAMES.map(function(n,i){
+      return '<button data-step="'+(i+1)+'"'+(state.step===i+1?' aria-current="step"':'')+'><span class="n">Step '+(i+1)+'</span><span class="l">'+n+'</span></button>';
+    }).join('');
+  }
+  function render(focusSel){
+    if(state.step===3)prefill();
+    $('#layout').classList.toggle('solo',state.step===3);
+    $('#chartCard').hidden=state.step===3;
+    $('#panel').innerHTML=[panel1,panel2,panel3][state.step-1]();
+    renderNav();
+    updateDerived();
+    if(focusSel){var el=document.querySelector(focusSel);if(el)el.focus();}
+  }
+  function go(n){
+    state.step=Math.min(3,Math.max(1,n));
+    render();
+    var el=$('#steps');
+    if(el&&el.scrollIntoView){try{el.scrollIntoView({block:'start'});}catch(e){}}
+  }
+  function setDesired(id,v){
+    if(!isFinite(v))v=0;
+    v=Math.max(0,v);
+    var cap=Math.max(24-(dsum()-(state.desired[id]||0)),0);
+    var clamped=v>cap;
+    if(clamped)v=cap;
+    state.desired[id]=Math.round(v*100)/100;
+    state.desiredTouched=true;
+    if(clamped){var inp=$('#dv-'+id);if(inp)inp.value=fmt(v);}
+    updateDerived();
+  }
+
+  /* ---------- summary and copy ---------- */
+  function summaryText(){
+    var L=['My day, as it was and as I want it','Yesterday logged: '+fmt(total())+' h',''];
+    POTS.forEach(function(p){
+      var a=potH(p.id),d=state.desired[p.id]||0;
+      L.push(p.name+': '+fmt(a)+' h to '+fmt(d)+' h ('+deltaText(d-a).toLowerCase()+')');
+    });
+    var oth=Math.max(24-dsum(),0),ao=potH('others');
+    L.push('Others: '+fmt(ao)+' h to '+fmt(oth)+' h ('+deltaText(oth-ao).toLowerCase()+')');
+    L.push('');
+    L.push('Four Pots Time Check, from The Uncommon Chapter');
+    return L.join('\n');
+  }
+  function doCopy(){
+    var text=summaryText(),msg=$('#copyMsg'),out=$('#copyOut'),ta=$('#sumText');
+    ta.value=text;
+    function fallback(){
+      out.hidden=false;ta.focus();ta.select();
+      msg.textContent='Select and copy the text below.';
+    }
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){out.hidden=false;msg.textContent='Copied.';},fallback);
+      }else{fallback();}
+    }catch(e){fallback();}
+  }
+
+  /* ---------- events ---------- */
+  function rowOf(el){var n=el.closest('[data-id]');return n?state.rows.find(function(x){return String(x.id)===n.dataset.id;}):null;}
+  $('#steps').addEventListener('click',function(e){
+    var b=e.target.closest('[data-step]');if(b)go(parseInt(b.dataset.step,10));
+  });
+  var panel=$('#panel');
+  panel.addEventListener('input',function(e){
+    var t=e.target;
+    if(t.classList.contains('dval')){setDesired(t.dataset.t,parseFloat(t.value));return;}
+    var r=rowOf(t);if(!r)return;
+    if(t.classList.contains('name'))r.name=t.value;
+    else if(t.classList.contains('hours')){var v=parseFloat(t.value);r.h=isFinite(v)?Math.min(Math.max(v,0),24):0;}
+    else return;
+    state.example=false;updateDerived();
+  });
+  panel.addEventListener('change',function(e){
+    var t=e.target,r=rowOf(t);if(!r)return;
+    if(t.classList.contains('potsel'))r.pot=t.value;
+    else return;
+    state.example=false;updateDerived();
+  });
+  panel.addEventListener('click',function(e){
+    var b=e.target.closest('[data-act]');if(!b)return;
+    var act=b.dataset.act;
+    if(act==='next'){go(state.step+1);}
+    else if(act==='back'){go(state.step-1);}
+    else if(act==='remove'){var r=rowOf(b);if(r){state.rows=state.rows.filter(function(x){return x!==r;});state.example=false;render();}}
+    else if(act==='chip'){var c=CHIPS[parseInt(b.dataset.i,10)];var nr=mk(c[0],c[1],c[2]);state.rows.push(nr);state.example=false;render('[data-id="'+nr.id+'"] .hours');}
+    else if(act==='addblank'){var nb=mk('',0.5,'others');state.rows.push(nb);state.example=false;render('[data-id="'+nb.id+'"] .name');}
+    else if(act==='clear'){state.rows=[];state.example=false;state.desiredTouched=false;render();}
+    else if(act==='example'){state.rows=exampleRows();state.example=true;state.desiredTouched=false;render();}
+    else if(act==='dinc'||act==='ddec'){
+      var id=b.dataset.t,cur=state.desired[id]||0;
+      setDesired(id,act==='dinc'?cur+0.25:cur-0.25);
+    }
+    else if(act==='copy'){doCopy();}
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
